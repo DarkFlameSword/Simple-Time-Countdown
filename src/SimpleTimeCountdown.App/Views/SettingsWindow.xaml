@@ -1,0 +1,224 @@
+<Window x:Class="TimeCountdown.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding [Window.Settings.Title], Source={StaticResource Loc}}"
+        Width="520"
+        SizeToContent="Height"
+        MinWidth="520"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F7FBFF"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style x:Key="SectionBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#D9E8F6" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Margin" Value="0,0,0,14" />
+        </Style>
+    </Window.Resources>
+
+    <Border Padding="24">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Foreground="#184B79"
+                           FontSize="26"
+                           FontWeight="Bold"
+                           Text="{Binding [Settings.Title], Source={StaticResource Loc}}" />
+                <TextBlock Margin="0,6,0,0"
+                           Foreground="#6785A3"
+                           FontSize="14"
+                           Text="{Binding [Settings.Subtitle], Source={StaticResource Loc}}" />
+            </StackPanel>
+
+            <Border Grid.Row="1" Style="{StaticResource SectionBorderStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="#1B4369"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Text="{Binding [Settings.Display], Source={StaticResource Loc}}" />
+
+                    <CheckBox Margin="0,16,0,0"
+                              Foreground="#2B5E8B"
+                              FontWeight="SemiBold"
+                              Content="{Binding [Settings.AlwaysOnTop], Source={StaticResource Loc}}"
+                              IsChecked="{Binding AlwaysOnTop}" />
+
+                    <CheckBox Margin="0,10,0,0"
+                              Foreground="#2B5E8B"
+                              FontWeight="SemiBold"
+                              Content="{Binding [Settings.DesktopLayer], Source={StaticResource Loc}}"
+                              IsChecked="{Binding DesktopLayerEnabled}" />
+
+                    <TextBlock Margin="24,6,0,0"
+                               Foreground="#7390AC"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Text="{Binding [Settings.DesktopLayerHint], Source={StaticResource Loc}}" />
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Foreground="#2B5E8B"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding [Settings.PanelOpacity], Source={StaticResource Loc}}" />
+                            <Slider Margin="0,10,20,0"
+                                    Minimum="0.72"
+                                    Maximum="1.0"
+                                    TickFrequency="0.04"
+                                    IsSnapToTickEnabled="False"
+                                    Value="{Binding PanelOpacity}" />
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                Padding="12,8"
+                                Background="#EEF6FF"
+                                CornerRadius="12"
+                                VerticalAlignment="Bottom">
+                            <TextBlock Foreground="#4477AA"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding PanelOpacity, StringFormat={}{0:P0}}" />
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource SectionBorderStyle}">
+                <StackPanel>
+                    <TextBlock Foreground="#1B4369"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Text="{Binding [Settings.BehaviorDefaults], Source={StaticResource Loc}}" />
+
+                    <StackPanel Margin="0,16,0,0">
+                        <TextBlock Foreground="#2B5E8B"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding [Settings.Language], Source={StaticResource Loc}}" />
+                        <ComboBox Margin="0,10,0,0"
+                                  Height="38"
+                                  Padding="8,6"
+                                  Background="White"
+                                  BorderBrush="#D9E8F6"
+                                  BorderThickness="1"
+                                  Foreground="#1B4369"
+                                  DisplayMemberPath="Label"
+                                  SelectedValuePath="Code"
+                                  ItemsSource="{Binding LanguageOptions}"
+                                  SelectedValue="{Binding SelectedLanguageCode}" />
+                    </StackPanel>
+
+                    <CheckBox Margin="0,16,0,0"
+                              Foreground="#2B5E8B"
+                              FontWeight="SemiBold"
+                              Content="{Binding [Settings.Startup], Source={StaticResource Loc}}"
+                              IsChecked="{Binding LaunchAtStartup}" />
+
+                    <CheckBox Margin="0,10,0,0"
+                              Foreground="#2B5E8B"
+                              FontWeight="SemiBold"
+                              Content="{Binding [Settings.HideToTray], Source={StaticResource Loc}}"
+                              IsChecked="{Binding HideOnCloseToTray}" />
+
+                    <StackPanel Margin="0,16,0,0">
+                        <TextBlock Foreground="#2B5E8B"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding [Settings.SavedFilter], Source={StaticResource Loc}}" />
+                        <ComboBox Margin="0,10,0,0"
+                                  Height="38"
+                                  Padding="8,6"
+                                  Background="White"
+                                  BorderBrush="#D9E8F6"
+                                  BorderThickness="1"
+                                  Foreground="#1B4369"
+                                  DisplayMemberPath="Label"
+                                  ItemsSource="{Binding FilterOptions}"
+                                  SelectedValuePath="Key"
+                                  SelectedValue="{Binding SelectedFilter}" />
+                    </StackPanel>
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Foreground="#2B5E8B"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding [Settings.DefaultReminder], Source={StaticResource Loc}}" />
+                            <ComboBox Margin="0,10,0,0"
+                                      Height="38"
+                                      Padding="8,6"
+                                      Background="White"
+                                      BorderBrush="#D9E8F6"
+                                      BorderThickness="1"
+                                      Foreground="#1B4369"
+                                      DisplayMemberPath="Label"
+                                      SelectedValuePath="Minutes"
+                                      ItemsSource="{Binding ReminderOptions}"
+                                      SelectedValue="{Binding DefaultReminderMinutesBefore}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Foreground="#2B5E8B"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding [Settings.DefaultTimeZone], Source={StaticResource Loc}}" />
+                            <ComboBox Margin="0,10,0,0"
+                                      Height="38"
+                                      Padding="8,6"
+                                      Background="White"
+                                      BorderBrush="#D9E8F6"
+                                      BorderThickness="1"
+                                      Foreground="#1B4369"
+                                      DisplayMemberPath="DisplayName"
+                                      SelectedValuePath="Id"
+                                      ItemsSource="{Binding TimeZoneOptions}"
+                                      SelectedValue="{Binding DefaultTimeZoneId}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Margin="0,16,0,0">
+                        <TextBlock Foreground="#2B5E8B"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding [Settings.PanelPlacement], Source={StaticResource Loc}}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Foreground="#7390AC"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding [Settings.PlacementHint], Source={StaticResource Loc}}" />
+                        <Button Width="180"
+                                Margin="0,10,0,0"
+                                Padding="12,8"
+                                HorizontalAlignment="Left"
+                                Click="ResetPlacement_Click"
+                                Content="{Binding [Settings.ResetPlacement], Source={StaticResource Loc}}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Row="3"
+                        Margin="0,10,0,0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Width="108"
+                        Padding="12,8"
+                        Click="Close_Click"
+                        Content="{Binding [Common.Close], Source={StaticResource Loc}}"
+                        IsDefault="True" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

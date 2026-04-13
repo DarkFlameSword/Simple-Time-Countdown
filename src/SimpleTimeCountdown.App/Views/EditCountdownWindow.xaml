@@ -1,0 +1,144 @@
+<Window x:Class="TimeCountdown.Views.EditCountdownWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding [Window.Editor.Title], Source={StaticResource Loc}}"
+        Width="500"
+        SizeToContent="Height"
+        MinWidth="500"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#F7FBFF"
+        FontFamily="Segoe UI">
+    <Border Padding="24">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Foreground="#184B79"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Text="{Binding [Editor.Title], Source={StaticResource Loc}}" />
+
+            <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Title], Source={StaticResource Loc}}" />
+                <TextBox x:Name="TitleTextBox"
+                         Margin="0,8,0,0"
+                         Padding="12,10"
+                         Background="White"
+                         BorderBrush="#D9E8F6"
+                         BorderThickness="1" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,14,0,0">
+                <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Subtitle], Source={StaticResource Loc}}" />
+                <TextBox x:Name="SubtitleTextBox"
+                         Margin="0,8,0,0"
+                         Padding="12,10"
+                         Background="White"
+                         BorderBrush="#D9E8F6"
+                         BorderThickness="1" />
+            </StackPanel>
+
+            <Grid Grid.Row="3" Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition Width="90" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Date], Source={StaticResource Loc}}" />
+                    <DatePicker x:Name="TargetDatePicker"
+                                Margin="0,8,12,0"
+                                Height="38"
+                                Background="White" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Hour], Source={StaticResource Loc}}" />
+                    <ComboBox x:Name="HourComboBox"
+                              Margin="0,8,12,0"
+                              Height="38"
+                              Background="White" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Minute], Source={StaticResource Loc}}" />
+                    <ComboBox x:Name="MinuteComboBox"
+                              Margin="0,8,0,0"
+                              Height="38"
+                              Background="White" />
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="4" Margin="0,14,0,0">
+                <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.TimeZone], Source={StaticResource Loc}}" />
+                <ComboBox x:Name="TimeZoneComboBox"
+                          Margin="0,8,0,0"
+                          Height="38"
+                          Background="White"
+                          DisplayMemberPath="DisplayName" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="5" Margin="0,14,0,0">
+                <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Tags], Source={StaticResource Loc}}" />
+                <TextBox x:Name="TagsTextBox"
+                         Margin="0,8,0,0"
+                         Padding="12,10"
+                         Background="White"
+                         BorderBrush="#D9E8F6"
+                         BorderThickness="1" />
+            </StackPanel>
+
+            <Grid Grid.Row="6" Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Foreground="#567998" FontWeight="SemiBold" Text="{Binding [Editor.Field.Reminder], Source={StaticResource Loc}}" />
+                    <ComboBox x:Name="ReminderComboBox"
+                              Margin="0,8,12,0"
+                              Height="38"
+                              Background="White"
+                              DisplayMemberPath="Label" />
+                </StackPanel>
+
+                <CheckBox x:Name="PinnedCheckBox"
+                          Grid.Column="1"
+                          Margin="12,30,0,0"
+                          VerticalAlignment="Center"
+                          Foreground="#2B5E8B"
+                          FontWeight="SemiBold"
+                          Content="{Binding [Editor.Field.Pin], Source={StaticResource Loc}}" />
+            </Grid>
+
+            <StackPanel Grid.Row="7"
+                        Margin="0,24,0,0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Width="96"
+                        Margin="0,0,10,0"
+                        Padding="12,8"
+                        Click="Cancel_Click"
+                        Content="{Binding [Common.Cancel], Source={StaticResource Loc}}"
+                        IsCancel="True" />
+                <Button Width="108"
+                        Padding="12,8"
+                        Click="Save_Click"
+                        Content="{Binding [Common.Save], Source={StaticResource Loc}}"
+                        IsDefault="True" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
