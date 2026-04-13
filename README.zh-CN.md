@@ -1,6 +1,12 @@
 # Simple Time Countdown
 
-[English README](./README.md)
+<div align="center">
+
+**Language / 语言 / 語言 / Dil**
+
+[**English**](README.md) | [简体中文](README.zh-CN.md)
+
+</div>
 
 一个面向 Windows 11 的轻量级桌面倒计时应用，基于 WPF 和 .NET 8 构建。
 

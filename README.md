@@ -1,6 +1,13 @@
 # Simple Time Countdown
 
-[中文说明](./README.zh-CN.md)
+<div align="center">
+
+**Language / 语言 / 語言 / Dil**
+
+[**English**](README.md) | [简体中文](README.zh-CN.md)
+
+</div>
+
 
 A lightweight floating countdown app for Windows 11, built with WPF and .NET 8.
 
