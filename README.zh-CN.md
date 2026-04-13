@@ -2,8 +2,6 @@
 
 <div align="center">
 
-**Language / 语言 / 語言 / Dil**
-
 [**English**](README.md) | [简体中文](README.zh-CN.md)
 
 </div>
