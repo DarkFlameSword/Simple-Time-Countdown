@@ -9,6 +9,7 @@ internal static class InstallerEngine
 {
     public static void Install(InstallOptions options, IProgress<InstallerProgress>? progress)
     {
+        InstallerContext.SetInstallRoot(ResolveInstallDirectory(options.InstallDirectory));
         StopRunningApp();
 
         var tempDir = Path.Combine(Path.GetTempPath(), $"SimpleTimeCountdownSetup_{Guid.NewGuid():N}");
@@ -272,5 +273,15 @@ internal static class InstallerEngine
         {
             File.Delete(path);
         }
+    }
+
+    private static string ResolveInstallDirectory(string? installDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(installDirectory))
+        {
+            return InstallerContext.InstallRoot;
+        }
+
+        return Path.GetFullPath(Environment.ExpandEnvironmentVariables(installDirectory.Trim()));
     }
 }

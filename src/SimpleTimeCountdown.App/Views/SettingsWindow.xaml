@@ -135,18 +135,120 @@
                     <StackPanel Margin="0,16,0,0">
                         <TextBlock Foreground="#2B5E8B"
                                    FontWeight="SemiBold"
-                                   Text="{Binding [Settings.SavedFilter], Source={StaticResource Loc}}" />
-                        <ComboBox Margin="0,10,0,0"
-                                  Height="38"
-                                  Padding="8,6"
-                                  Background="White"
-                                  BorderBrush="#D9E8F6"
-                                  BorderThickness="1"
-                                  Foreground="#1B4369"
-                                  DisplayMemberPath="Label"
-                                  ItemsSource="{Binding FilterOptions}"
-                                  SelectedValuePath="Key"
-                                  SelectedValue="{Binding SelectedFilter}" />
+                                   Text="{Binding [Settings.StatusThresholds], Source={StaticResource Loc}}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   Foreground="#7390AC"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding [Settings.StatusThresholdHint], Source={StaticResource Loc}}" />
+
+                        <Grid Margin="0,10,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="164" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="52" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0"
+                                       Foreground="#2B5E8B"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding [Settings.Threshold.Overdue], Source={StaticResource Loc}}" />
+                            <Border Grid.Row="0"
+                                    Grid.Column="1"
+                                    Margin="10,0,0,0"
+                                    Height="26"
+                                    Background="#F2F7FD"
+                                    BorderBrush="#D9E8F6"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    VerticalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="#6E8DAA"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Text="0" />
+                            </Border>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="#4B7299"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding OverdueThresholdDays}" />
+
+                            <TextBlock Grid.Row="1"
+                                       Margin="0,10,0,0"
+                                       Foreground="#2B5E8B"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding [Settings.Threshold.Today], Source={StaticResource Loc}}" />
+                            <Slider Grid.Row="1"
+                                    Grid.Column="1"
+                                    Margin="10,10,0,0"
+                                    Minimum="-30"
+                                    Maximum="60"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding TodayThresholdDays}" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="2"
+                                       Margin="0,10,0,0"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="#4B7299"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding TodayThresholdDays}" />
+
+                            <TextBlock Grid.Row="2"
+                                       Margin="0,10,0,0"
+                                       Foreground="#2B5E8B"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding [Settings.Threshold.Soon], Source={StaticResource Loc}}" />
+                            <Slider Grid.Row="2"
+                                    Grid.Column="1"
+                                    Margin="10,10,0,0"
+                                    Minimum="-30"
+                                    Maximum="120"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding SoonThresholdDays}" />
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="2"
+                                       Margin="0,10,0,0"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="#4B7299"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding SoonThresholdDays}" />
+
+                            <TextBlock Grid.Row="3"
+                                       Margin="0,10,0,0"
+                                       Foreground="#2B5E8B"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding [Settings.Threshold.Safe], Source={StaticResource Loc}}" />
+                            <Slider Grid.Row="3"
+                                    Grid.Column="1"
+                                    Margin="10,10,0,0"
+                                    Minimum="-30"
+                                    Maximum="180"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"
+                                    Value="{Binding SafeThresholdDays}" />
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="2"
+                                       Margin="0,10,0,0"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Center"
+                                       Foreground="#4B7299"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding SafeThresholdDays}" />
+                        </Grid>
                     </StackPanel>
 
                     <Grid Margin="0,16,0,0">

@@ -9,6 +9,8 @@
 
 A lightweight floating countdown app for Windows 11, built with WPF and .NET 8.
 
+![img](example.png)
+
 ## Why this project
 
 Simple Time Countdown is designed around three product goals:
@@ -20,12 +22,16 @@ Simple Time Countdown is designed around three product goals:
 ## Repository structure
 
 - `.github/workflows/` contains CI for Windows builds
-- `docs/` contains repository and release documentation
+- `docs/` contains repository, release, and development workflow documentation
 - `packaging/msix/` contains the MSIX manifest and packaging assets
 - `scripts/` contains asset generation, publish, and install scripts
 - `src/SimpleTimeCountdown.App/` contains the WPF desktop app
 - `src/SimpleTimeCountdown.Setup/` contains the branded installer
 - `artifacts/` is generated output only and should not be committed
+
+## Development workflow
+
+This project follows a reusable lightweight desktop app workflow, from product definition and UI preview through packaging and GitHub publication. See [docs/DEVELOPMENT_WORKFLOW.md](/E:/Work/Github%20Repository/Time%20Countdown/docs/DEVELOPMENT_WORKFLOW.md).
 
 ## Features
 
@@ -86,5 +92,5 @@ Outputs:
 
 - Portable zip: [SimpleTimeCountdown-Release-win-x64-portable.zip](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Release-win-x64-portable.zip)
 - Setup EXE: [SimpleTimeCountdown-Setup-win-x64.exe](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Setup-win-x64.exe)
-- MSIX: [SimpleTimeCountdown_1.1.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.1.0.0_win-x64.msix)
+- MSIX: [SimpleTimeCountdown_1.2.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.2.0.0_win-x64.msix)
 - Dev certificate: [TimeCountdownDev.cer](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/certificates/TimeCountdownDev.cer)

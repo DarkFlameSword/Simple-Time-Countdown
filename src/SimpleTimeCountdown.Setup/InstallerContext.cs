@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.Win32;
 
 namespace TimeCountdown.Setup;
 
@@ -8,16 +9,20 @@ internal static class InstallerContext
     private const string LegacyProductName = "Time Countdown";
     private const string AppExecutableName = "TimeCountdown.exe";
     private const string InstallerExecutableName = "Simple Time Countdown Setup.exe";
+    private static readonly string DefaultInstallRootPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Programs",
+        LegacyProductName);
+    private static string _installRoot = ResolveCurrentInstallRoot();
 
     public static string ProductVersion =>
         Assembly.GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion ?? "1.1.0";
+            .InformationalVersion ?? "1.2.0";
 
-    public static string InstallRoot => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Programs",
-        LegacyProductName);
+    public static string InstallRoot => _installRoot;
+
+    public static string DefaultInstallRoot => DefaultInstallRootPath;
 
     public static string InstallerDirectory => Path.Combine(InstallRoot, "Installer");
 
@@ -72,4 +77,33 @@ internal static class InstallerContext
         StartMenuDirectory,
         LegacyStartMenuDirectory
     ];
+
+    public static void SetInstallRoot(string installRoot)
+    {
+        if (string.IsNullOrWhiteSpace(installRoot))
+        {
+            _installRoot = DefaultInstallRootPath;
+            return;
+        }
+
+        _installRoot = Path.GetFullPath(Environment.ExpandEnvironmentVariables(installRoot.Trim()));
+    }
+
+    private static string ResolveCurrentInstallRoot()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(UninstallRegistryPath);
+            var installLocation = key?.GetValue("InstallLocation") as string;
+            if (!string.IsNullOrWhiteSpace(installLocation))
+            {
+                return Path.GetFullPath(installLocation);
+            }
+        }
+        catch
+        {
+        }
+
+        return DefaultInstallRootPath;
+    }
 }

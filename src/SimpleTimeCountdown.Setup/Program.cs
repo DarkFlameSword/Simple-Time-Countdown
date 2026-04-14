@@ -11,12 +11,13 @@ internal static class Program
         var noLaunch = args.Any(arg => string.Equals(arg, "--no-launch", StringComparison.OrdinalIgnoreCase));
         var uninstall = args.Any(arg => string.Equals(arg, "--uninstall", StringComparison.OrdinalIgnoreCase));
         var removeData = args.Any(arg => string.Equals(arg, "--remove-data", StringComparison.OrdinalIgnoreCase));
+        var installDirectory = ResolveInstallDirectory(args);
 
         try
         {
             if (silent)
             {
-                RunSilent(uninstall, noLaunch, removeData);
+                RunSilent(uninstall, noLaunch, removeData, installDirectory);
                 return;
             }
 
@@ -34,7 +35,7 @@ internal static class Program
         }
     }
 
-    private static void RunSilent(bool uninstall, bool noLaunch, bool removeData)
+    private static void RunSilent(bool uninstall, bool noLaunch, bool removeData, string? installDirectory)
     {
         if (uninstall)
         {
@@ -50,8 +51,21 @@ internal static class Program
         InstallerEngine.Install(
             new InstallOptions
             {
-                LaunchAfterInstall = !noLaunch
+                LaunchAfterInstall = !noLaunch,
+                InstallDirectory = installDirectory
             },
             progress: null);
+    }
+
+    private static string? ResolveInstallDirectory(string[] args)
+    {
+        var argument = args.FirstOrDefault(static arg => arg.StartsWith("--install-dir=", StringComparison.OrdinalIgnoreCase));
+        if (argument is null)
+        {
+            return null;
+        }
+
+        var value = argument["--install-dir=".Length..].Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 }

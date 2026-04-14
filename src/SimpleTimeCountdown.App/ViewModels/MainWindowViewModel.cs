@@ -25,6 +25,10 @@ public sealed class MainWindowViewModel : ObservableObject
     private double _panelOpacity;
     private int _defaultReminderMinutesBefore;
     private string _defaultTimeZoneId = TimeZoneInfo.Local.Id;
+    private int _overdueThresholdDays;
+    private int _todayThresholdDays = 1;
+    private int _soonThresholdDays = 7;
+    private int _safeThresholdDays = 8;
     private IReadOnlyList<LanguageOption> _languageOptions = [];
     private string _selectedLanguageCode = "en";
     private bool _hasVisibleItems;
@@ -57,7 +61,7 @@ public sealed class MainWindowViewModel : ObservableObject
 
         _alwaysOnTop = state.Settings.AlwaysOnTop;
         _panelOpacity = Math.Clamp(state.Settings.PanelOpacity, 0.72, 1.00);
-        _selectedFilter = _filterOptions.Any(option => option.Key == state.Settings.SelectedFilter) ? state.Settings.SelectedFilter : "All";
+        _selectedFilter = NormalizeFilterKey(state.Settings.SelectedFilter);
         _launchAtStartup = _autostartService.IsEnabled();
         _hideOnCloseToTray = state.Settings.HideOnCloseToTray;
         _desktopLayerEnabled = state.Settings.DesktopLayerEnabled;
@@ -67,6 +71,12 @@ public sealed class MainWindowViewModel : ObservableObject
         _defaultTimeZoneId = OptionCatalog.TimeZoneOptions.Any(option => option.Id == state.Settings.DefaultTimeZoneId)
             ? state.Settings.DefaultTimeZoneId
             : TimeZoneInfo.Local.Id;
+        ApplyThresholds(
+            state.Settings.OverdueThresholdDays,
+            state.Settings.TodayThresholdDays,
+            state.Settings.SoonThresholdDays,
+            state.Settings.SafeThresholdDays,
+            persist: false);
         _state.Settings.LaunchAtStartup = _launchAtStartup;
         _state.Settings.LanguageCode = _selectedLanguageCode;
 
@@ -93,7 +103,15 @@ public sealed class MainWindowViewModel : ObservableObject
     public IReadOnlyList<FilterOption> FilterOptions
     {
         get => _filterOptions;
-        private set => SetProperty(ref _filterOptions, value);
+        private set
+        {
+            if (!SetProperty(ref _filterOptions, value))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(SelectedFilterOption));
+        }
     }
 
     public IReadOnlyList<ReminderOption> ReminderOptions
@@ -131,10 +149,7 @@ public sealed class MainWindowViewModel : ObservableObject
         get => _selectedFilter;
         set
         {
-            if (!FilterOptions.Any(option => option.Key == value))
-            {
-                value = "All";
-            }
+            value = NormalizeFilterKey(value);
 
             if (!SetProperty(ref _selectedFilter, value))
             {
@@ -142,8 +157,15 @@ public sealed class MainWindowViewModel : ObservableObject
             }
 
             _state.Settings.SelectedFilter = value;
+            OnPropertyChanged(nameof(SelectedFilterOption));
             RefreshCountdowns(forcePersist: true);
         }
+    }
+
+    public FilterOption? SelectedFilterOption
+    {
+        get => FilterOptions.FirstOrDefault(option => option.Key == SelectedFilter) ?? FilterOptions.FirstOrDefault();
+        set => SelectedFilter = value?.Key ?? "All";
     }
 
     public bool AlwaysOnTop
@@ -287,6 +309,30 @@ public sealed class MainWindowViewModel : ObservableObject
         }
     }
 
+    public int OverdueThresholdDays
+    {
+        get => _overdueThresholdDays;
+        set => ApplyThresholds(value, _todayThresholdDays, _soonThresholdDays, _safeThresholdDays, persist: true);
+    }
+
+    public int TodayThresholdDays
+    {
+        get => _todayThresholdDays;
+        set => ApplyThresholds(_overdueThresholdDays, value, _soonThresholdDays, _safeThresholdDays, persist: true);
+    }
+
+    public int SoonThresholdDays
+    {
+        get => _soonThresholdDays;
+        set => ApplyThresholds(_overdueThresholdDays, _todayThresholdDays, value, _safeThresholdDays, persist: true);
+    }
+
+    public int SafeThresholdDays
+    {
+        get => _safeThresholdDays;
+        set => ApplyThresholds(_overdueThresholdDays, _todayThresholdDays, _soonThresholdDays, value, persist: true);
+    }
+
     public bool HasVisibleItems
     {
         get => _hasVisibleItems;
@@ -371,6 +417,10 @@ public sealed class MainWindowViewModel : ObservableObject
         _state.Settings.SelectedFilter = SelectedFilter;
         _state.Settings.DefaultReminderMinutesBefore = DefaultReminderMinutesBefore;
         _state.Settings.DefaultTimeZoneId = DefaultTimeZoneId;
+        _state.Settings.OverdueThresholdDays = OverdueThresholdDays;
+        _state.Settings.TodayThresholdDays = TodayThresholdDays;
+        _state.Settings.SoonThresholdDays = SoonThresholdDays;
+        _state.Settings.SafeThresholdDays = SafeThresholdDays;
         _state.Settings.LanguageCode = SelectedLanguageCode;
         _stateService.Save(_state);
     }
@@ -380,13 +430,13 @@ public sealed class MainWindowViewModel : ObservableObject
         var now = DateTimeOffset.Now;
         var selectedZone = OptionCatalog.ResolveTimeZone(DefaultTimeZoneId);
         var selectedZoneTime = TimeZoneInfo.ConvertTime(now, selectedZone);
-        var selectedZoneLabel = TimeZoneOptions.FirstOrDefault(option => option.Id == DefaultTimeZoneId)?.DisplayName
-                                ?? selectedZone.StandardName;
+        var useEnglishZoneName = string.Equals(_localization.CurrentLanguageCode, "en", StringComparison.OrdinalIgnoreCase);
+        var selectedZoneLabel = OptionCatalog.BuildDisplayName(selectedZone, useEnglishZoneName);
         var shouldPersist = false;
 
         foreach (var countdown in Countdowns)
         {
-            countdown.Refresh(now);
+            countdown.Refresh(now, BuildThresholds());
             shouldPersist |= TryTriggerNotifications(countdown, now);
         }
 
@@ -441,11 +491,6 @@ public sealed class MainWindowViewModel : ObservableObject
             return false;
         }
 
-        if (!MatchesFilter(item))
-        {
-            return false;
-        }
-
         if (string.IsNullOrWhiteSpace(SearchText))
         {
             return true;
@@ -457,15 +502,70 @@ public sealed class MainWindowViewModel : ObservableObject
                item.Tags.Any(tag => tag.Contains(query, StringComparison.OrdinalIgnoreCase));
     }
 
-    private bool MatchesFilter(CountdownItemViewModel item)
+    private void ApplyThresholds(int overdueDays, int todayDays, int soonDays, int safeDays, bool persist)
     {
-        return SelectedFilter switch
+        overdueDays = 0;
+        var normalized = NormalizeThresholds(overdueDays, todayDays, soonDays, safeDays);
+        var changed = false;
+
+        changed |= SetProperty(ref _overdueThresholdDays, normalized.OverdueDays, nameof(OverdueThresholdDays));
+        changed |= SetProperty(ref _todayThresholdDays, normalized.TodayDays, nameof(TodayThresholdDays));
+        changed |= SetProperty(ref _soonThresholdDays, normalized.SoonDays, nameof(SoonThresholdDays));
+        changed |= SetProperty(ref _safeThresholdDays, normalized.SafeDays, nameof(SafeThresholdDays));
+
+        if (!changed)
         {
-            "Urgent" => item.IsUrgent,
-            "Pinned" => item.IsPinned,
-            "Overdue" => item.IsOverdue,
-            _ => true
-        };
+            return;
+        }
+
+        _state.Settings.OverdueThresholdDays = _overdueThresholdDays;
+        _state.Settings.TodayThresholdDays = _todayThresholdDays;
+        _state.Settings.SoonThresholdDays = _soonThresholdDays;
+        _state.Settings.SafeThresholdDays = _safeThresholdDays;
+
+        RefreshCountdowns(forcePersist: persist);
+    }
+
+    private CountdownThresholds BuildThresholds()
+    {
+        return new CountdownThresholds(
+            _overdueThresholdDays,
+            _todayThresholdDays,
+            _soonThresholdDays,
+            _safeThresholdDays);
+    }
+
+    private static CountdownThresholds NormalizeThresholds(int overdueDays, int todayDays, int soonDays, int safeDays)
+    {
+        overdueDays = 0;
+        todayDays = Math.Clamp(todayDays, -30, 60);
+        soonDays = Math.Clamp(soonDays, -30, 120);
+        safeDays = Math.Clamp(safeDays, -30, 180);
+
+        todayDays = Math.Max(todayDays, overdueDays + 1);
+        soonDays = Math.Max(soonDays, todayDays + 1);
+        safeDays = Math.Max(safeDays, soonDays + 1);
+
+        return new CountdownThresholds(overdueDays, todayDays, soonDays, safeDays);
+    }
+
+    private string NormalizeFilterKey(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "All";
+        }
+
+        var byKey = FilterOptions.FirstOrDefault(option =>
+            string.Equals(option.Key, value, StringComparison.OrdinalIgnoreCase));
+        if (byKey is not null)
+        {
+            return byKey.Key;
+        }
+
+        var byLabel = FilterOptions.FirstOrDefault(option =>
+            string.Equals(option.Label, value, StringComparison.CurrentCultureIgnoreCase));
+        return byLabel?.Key ?? "All";
     }
 
     private void SortCountdowns()
@@ -517,8 +617,9 @@ public sealed class MainWindowViewModel : ObservableObject
         return
         [
             new FilterOption("All", _localization["Filter.All"]),
-            new FilterOption("Urgent", _localization["Filter.Urgent"]),
-            new FilterOption("Pinned", _localization["Filter.Pinned"]),
+            new FilterOption("Safe", _localization["Filter.Safe"]),
+            new FilterOption("Soon", _localization["Filter.Soon"]),
+            new FilterOption("Today", _localization["Filter.Today"]),
             new FilterOption("Overdue", _localization["Filter.Overdue"])
         ];
     }

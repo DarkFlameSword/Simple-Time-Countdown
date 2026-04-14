@@ -14,6 +14,9 @@ internal sealed class InstallerForm : Form
     private readonly Label _bodyLabel;
     private readonly Label _versionLabel;
     private readonly Label _locationLabel;
+    private readonly Panel _installPathPanel;
+    private readonly TextBox _installPathTextBox;
+    private readonly Button _browseInstallPathButton;
     private readonly Label _changesTitleLabel;
     private readonly Label _changesBodyLabel;
     private readonly Label _statusLabel;
@@ -91,11 +94,11 @@ internal sealed class InstallerForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 13,
+            RowCount = 14,
             Padding = new Padding(0, 4, 0, 0)
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        for (var i = 0; i < 9; i++)
+        for (var i = 0; i < 10; i++)
         {
             layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         }
@@ -115,6 +118,47 @@ internal sealed class InstallerForm : Form
         _versionLabel.Margin = new Padding(0, 18, 0, 0);
         _locationLabel = CreateLabel(Color.FromArgb(74, 98, 122), new Font("Segoe UI", 9.5F, FontStyle.Regular, GraphicsUnit.Point), 520);
         _locationLabel.Margin = new Padding(0, 8, 0, 0);
+
+        _installPathTextBox = new TextBox
+        {
+            Width = 370,
+            Height = 32,
+            BorderStyle = BorderStyle.FixedSingle,
+            Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point),
+            Text = InstallerContext.InstallRoot
+        };
+        _installPathTextBox.ReadOnly = true;
+        _installPathTextBox.TabStop = false;
+        _installPathTextBox.Click += BrowseInstallPathButtonOnClick;
+        _installPathTextBox.DoubleClick += BrowseInstallPathButtonOnClick;
+
+        _browseInstallPathButton = new Button
+        {
+            AutoSize = false,
+            Size = new Size(84, 32),
+            Text = "浏览...",
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(245, 250, 255),
+            ForeColor = Color.FromArgb(52, 95, 137),
+            Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold, GraphicsUnit.Point),
+            Margin = new Padding(8, 0, 0, 0)
+        };
+        _browseInstallPathButton.Text = "\u66F4\u6539";
+        _browseInstallPathButton.FlatAppearance.BorderColor = Color.FromArgb(206, 224, 242);
+        _browseInstallPathButton.FlatAppearance.BorderSize = 1;
+        _browseInstallPathButton.Click += BrowseInstallPathButtonOnClick;
+
+        _installPathPanel = new Panel
+        {
+            Height = 34,
+            Margin = new Padding(0, 8, 0, 0),
+            Dock = DockStyle.Top
+        };
+        _installPathPanel.SizeChanged += (_, _) => LayoutInstallPathControls();
+        _installPathPanel.Controls.Add(_installPathTextBox);
+        _installPathPanel.Controls.Add(_browseInstallPathButton);
+        LayoutInstallPathControls();
+
         _changesTitleLabel = CreateLabel(Color.FromArgb(43, 94, 139), new Font("Segoe UI Semibold", 10F, FontStyle.Bold, GraphicsUnit.Point), 520);
         _changesTitleLabel.Margin = new Padding(0, 18, 0, 0);
         _changesBodyLabel = CreateLabel(Color.FromArgb(84, 107, 129), new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point), 520);
@@ -198,14 +242,15 @@ internal sealed class InstallerForm : Form
         layout.Controls.Add(_bodyLabel, 0, 2);
         layout.Controls.Add(_versionLabel, 0, 3);
         layout.Controls.Add(_locationLabel, 0, 4);
-        layout.Controls.Add(_changesTitleLabel, 0, 5);
-        layout.Controls.Add(_changesBodyLabel, 0, 6);
-        layout.Controls.Add(_launchCheckBox, 0, 7);
-        layout.Controls.Add(_removeDataCheckBox, 0, 8);
-        layout.Controls.Add(_statusLabel, 0, 9);
-        layout.Controls.Add(_progressBar, 0, 10);
-        layout.Controls.Add(spacer, 0, 11);
-        layout.Controls.Add(buttonPanel, 0, 12);
+        layout.Controls.Add(_installPathPanel, 0, 5);
+        layout.Controls.Add(_changesTitleLabel, 0, 6);
+        layout.Controls.Add(_changesBodyLabel, 0, 7);
+        layout.Controls.Add(_launchCheckBox, 0, 8);
+        layout.Controls.Add(_removeDataCheckBox, 0, 9);
+        layout.Controls.Add(_statusLabel, 0, 10);
+        layout.Controls.Add(_progressBar, 0, 11);
+        layout.Controls.Add(spacer, 0, 12);
+        layout.Controls.Add(buttonPanel, 0, 13);
 
         MouseDown += DragWindow;
         _brandPanel.MouseDown += DragWindow;
@@ -239,9 +284,11 @@ internal sealed class InstallerForm : Form
         _versionLabel.Text = $"版本 {InstallerContext.ProductVersion}  |  适用于 Windows 11 x64";
         _locationLabel.Text = _uninstallMode
             ? $"当前安装位置{Environment.NewLine}{InstallerContext.InstallRoot}"
-            : $"建议安装位置{Environment.NewLine}{InstallerContext.InstallRoot}";
+            : "安装位置（可自定义）";
+        _installPathTextBox.Text = InstallerContext.InstallRoot;
         _changesTitleLabel.Text = _uninstallMode ? string.Empty : $"{InstallerContext.ProductVersion} 改动细则";
         _changesBodyLabel.Text = _uninstallMode ? string.Empty : InstallerReleaseInfo.BuildHighlightsText();
+        _installPathPanel.Visible = !_uninstallMode;
         _changesTitleLabel.Visible = !_uninstallMode;
         _changesBodyLabel.Visible = !_uninstallMode;
         _launchCheckBox.Visible = !_uninstallMode;
@@ -289,10 +336,12 @@ internal sealed class InstallerForm : Form
                 _existingInstall ? $"正在更新 {InstallerContext.ProductName}" : $"正在安装 {InstallerContext.ProductName}",
                 "正在准备桌面倒计时应用和安装资源。");
 
+            var selectedInstallDirectory = GetSelectedInstallDirectory();
             await RunStaTask(() => InstallerEngine.Install(
                 new InstallOptions
                 {
-                    LaunchAfterInstall = _launchCheckBox.Checked
+                    LaunchAfterInstall = _launchCheckBox.Checked,
+                    InstallDirectory = selectedInstallDirectory
                 },
                 progress));
 
@@ -321,6 +370,7 @@ internal sealed class InstallerForm : Form
         _bodyLabel.Text = detail;
         _versionLabel.Text = string.Empty;
         _locationLabel.Text = string.Empty;
+        _installPathPanel.Visible = false;
         _changesTitleLabel.Visible = false;
         _changesBodyLabel.Visible = false;
         _launchCheckBox.Visible = false;
@@ -341,6 +391,7 @@ internal sealed class InstallerForm : Form
         _bodyLabel.Text = body;
         _versionLabel.Text = string.Empty;
         _locationLabel.Text = string.Empty;
+        _installPathPanel.Visible = false;
         _changesTitleLabel.Visible = false;
         _changesBodyLabel.Visible = false;
         _launchCheckBox.Visible = false;
@@ -450,6 +501,55 @@ internal sealed class InstallerForm : Form
         stream.CopyTo(buffer);
         buffer.Position = 0;
         return Image.FromStream(buffer);
+    }
+
+    private void LayoutInstallPathControls()
+    {
+        var availableWidth = _installPathPanel.ClientSize.Width;
+        if (availableWidth <= 0)
+        {
+            return;
+        }
+
+        const int spacing = 8;
+        var buttonWidth = _browseInstallPathButton.Width;
+        var textBoxWidth = Math.Max(160, availableWidth - buttonWidth - spacing);
+        _installPathTextBox.Location = new Point(0, 0);
+        _installPathTextBox.Width = textBoxWidth;
+        _browseInstallPathButton.Location = new Point(textBoxWidth + spacing, 0);
+    }
+
+    private void BrowseInstallPathButtonOnClick(object? sender, EventArgs e)
+    {
+        using var dialog = new FolderBrowserDialog
+        {
+            Description = $"选择 {InstallerContext.ProductName} 的安装目录",
+            UseDescriptionForTitle = true,
+            SelectedPath = string.IsNullOrWhiteSpace(_installPathTextBox.Text)
+                ? InstallerContext.DefaultInstallRoot
+                : _installPathTextBox.Text
+        };
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            _installPathTextBox.Text = dialog.SelectedPath;
+        }
+    }
+
+    private string GetSelectedInstallDirectory()
+    {
+        if (_uninstallMode)
+        {
+            return InstallerContext.InstallRoot;
+        }
+
+        var rawPath = _installPathTextBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(rawPath))
+        {
+            throw new InvalidOperationException("安装目录不能为空。");
+        }
+
+        return Path.GetFullPath(Environment.ExpandEnvironmentVariables(rawPath));
     }
 
     private void DragWindow(object? sender, MouseEventArgs e)

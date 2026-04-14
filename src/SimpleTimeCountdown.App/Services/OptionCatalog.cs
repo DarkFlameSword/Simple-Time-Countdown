@@ -6,7 +6,7 @@ public static class OptionCatalog
 {
     public static IReadOnlyList<TimeZoneOption> TimeZoneOptions { get; } =
         TimeZoneInfo.GetSystemTimeZones()
-            .Select(static zone => new TimeZoneOption(zone.Id, BuildDisplayName(zone)))
+            .Select(static zone => new TimeZoneOption(zone.Id, BuildDisplayName(zone, useEnglishName: false)))
             .ToList();
 
     public static IReadOnlyList<ReminderOption> GetReminderOptions()
@@ -34,11 +34,12 @@ public static class OptionCatalog
         }
     }
 
-    private static string BuildDisplayName(TimeZoneInfo zone)
+    public static string BuildDisplayName(TimeZoneInfo zone, bool useEnglishName)
     {
         var offset = zone.BaseUtcOffset;
         var sign = offset >= TimeSpan.Zero ? "+" : "-";
         var absoluteOffset = offset.Duration();
-        return FormattableString.Invariant($"UTC{sign}{absoluteOffset:hh\\:mm} | {zone.DisplayName}");
+        var zoneName = useEnglishName ? zone.Id : zone.DisplayName;
+        return FormattableString.Invariant($"UTC{sign}{absoluteOffset:hh\\:mm} | {zoneName}");
     }
 }

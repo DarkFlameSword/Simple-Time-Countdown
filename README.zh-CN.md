@@ -8,6 +8,8 @@
 
 一个面向 Windows 11 的轻量级桌面倒计时应用，基于 WPF 和 .NET 8 构建。
 
+![img](example.png)
+
 ## 项目特点
 
 Simple Time Countdown 主要围绕三个目标设计：
@@ -82,5 +84,5 @@ powershell -ExecutionPolicy Bypass -File E:\Work\Github Repository\Time Countdow
 
 - 便携版 ZIP：[SimpleTimeCountdown-Release-win-x64-portable.zip](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Release-win-x64-portable.zip)
 - 安装包 EXE：[SimpleTimeCountdown-Setup-win-x64.exe](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Setup-win-x64.exe)
-- MSIX：[SimpleTimeCountdown_1.1.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.1.0.0_win-x64.msix)
+- MSIX：[SimpleTimeCountdown_1.2.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.2.0.0_win-x64.msix)
 - 开发证书：[TimeCountdownDev.cer](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/certificates/TimeCountdownDev.cer)

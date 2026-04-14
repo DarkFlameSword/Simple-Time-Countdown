@@ -18,6 +18,14 @@ public sealed class AppSettings
 
     public string DefaultTimeZoneId { get; set; } = TimeZoneInfo.Local.Id;
 
+    public int OverdueThresholdDays { get; set; }
+
+    public int TodayThresholdDays { get; set; } = 1;
+
+    public int SoonThresholdDays { get; set; } = 7;
+
+    public int SafeThresholdDays { get; set; } = 8;
+
     public string LanguageCode { get; set; } = "en";
 
     public double WindowLeft { get; set; } = double.NaN;

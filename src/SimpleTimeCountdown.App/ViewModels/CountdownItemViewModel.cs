@@ -21,6 +21,10 @@ public sealed class CountdownItemViewModel : ObservableObject
     private double _progressPercent;
     private bool _isOverdue;
     private bool _isUrgent;
+    private bool _isToday;
+    private bool _isSoon;
+    private bool _isSafe;
+    private CountdownThresholds _thresholds = CountdownThresholds.Default;
 
     public CountdownItemViewModel(CountdownItem model)
     {
@@ -109,13 +113,49 @@ public sealed class CountdownItemViewModel : ObservableObject
         private set => SetProperty(ref _isUrgent, value);
     }
 
+    public bool IsToday
+    {
+        get => _isToday;
+        private set => SetProperty(ref _isToday, value);
+    }
+
+    public bool IsSoon
+    {
+        get => _isSoon;
+        private set => SetProperty(ref _isSoon, value);
+    }
+
+    public bool IsSafe
+    {
+        get => _isSafe;
+        private set => SetProperty(ref _isSafe, value);
+    }
+
     public DateTimeOffset TargetAt => _model.TargetAt;
 
     public void Refresh(DateTimeOffset now)
     {
+        Refresh(now, _thresholds);
+    }
+
+    public void Refresh(DateTimeOffset now, CountdownThresholds thresholds)
+    {
+        _thresholds = thresholds;
         var remaining = _model.TargetAt - now;
-        IsOverdue = remaining <= TimeSpan.Zero;
-        IsUrgent = !IsOverdue && remaining <= TimeSpan.FromDays(7);
+        var remainingDays = remaining.TotalDays;
+        IsOverdue = remainingDays < thresholds.OverdueDays;
+        IsToday = !IsOverdue && remainingDays < thresholds.TodayDays;
+        IsSoon = !IsOverdue && !IsToday && remainingDays < thresholds.SoonDays;
+        IsSafe = !IsOverdue && remainingDays >= thresholds.SafeDays;
+
+        // If users configure a gap between "soon" and "safe", keep that range in "soon"
+        // so every countdown always maps to a status badge.
+        if (!IsOverdue && !IsToday && !IsSoon && !IsSafe)
+        {
+            IsSoon = true;
+        }
+
+        IsUrgent = IsToday || IsSoon;
 
         if (IsOverdue)
         {
@@ -123,11 +163,11 @@ public sealed class CountdownItemViewModel : ObservableObject
             StatusForeground = CreateBrush("#FFFFFF");
             StatusBackground = CreateBrush("#F16262");
             ProgressBrush = CreateBrush("#F16262");
-            RemainingPrimary = $"{_localization["Status.Due"]} {FormatPrimary(-remaining)}";
+            RemainingPrimary = FormatPrimary(-remaining);
             RemainingSecondary = _localization["Countdown.TargetPassed"];
             ProgressPercent = 100;
         }
-        else if (remaining <= TimeSpan.FromHours(24))
+        else if (IsToday)
         {
             StatusText = _localization["Status.Today"];
             StatusForeground = CreateBrush("#FFFFFF");
@@ -137,7 +177,7 @@ public sealed class CountdownItemViewModel : ObservableObject
             RemainingSecondary = _localization.Format("Countdown.LeftSuffix", FormatDetailed(remaining));
             ProgressPercent = CalculateProgress(now);
         }
-        else if (remaining <= TimeSpan.FromDays(7))
+        else if (IsSoon)
         {
             StatusText = _localization["Status.Soon"];
             StatusForeground = CreateBrush("#8A5300");
