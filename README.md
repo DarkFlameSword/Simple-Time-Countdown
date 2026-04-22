@@ -94,3 +94,25 @@ Outputs:
 - Setup EXE: [SimpleTimeCountdown-Setup-win-x64.exe](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Setup-win-x64.exe)
 - MSIX: [SimpleTimeCountdown_1.2.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.2.0.0_win-x64.msix)
 - Dev certificate: [TimeCountdownDev.cer](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/certificates/TimeCountdownDev.cer)
+
+## Download
+
+Get the latest version from this repository's GitHub Releases page:
+
+- Latest release: [Releases / Latest](../../releases/latest)
+- All versions: [Releases](../../releases)
+
+Package differences:
+
+- `SimpleTimeCountdown-Setup-win-x64.exe` (Recommended for most users)
+  - Standard installer experience
+  - Creates Start menu/desktop entries and uninstall entry
+  - Best for one-click install and normal daily use
+- `SimpleTimeCountdown-Release-win-x64-portable.zip`
+  - No installer; unzip and run directly
+  - No system-level install/uninstall registration
+  - Best for USB drive, temporary use, or restricted environments
+- `SimpleTimeCountdown_*.msix`
+  - MSIX package model with cleaner install/uninstall isolation
+  - Better managed by Windows package infrastructure
+  - Best for users who prefer MSIX deployment workflows

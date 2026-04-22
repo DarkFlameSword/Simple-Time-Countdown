@@ -14,6 +14,8 @@ public sealed class AppSettings
 
     public string SelectedFilter { get; set; } = "All";
 
+    public bool HideOverdueCards { get; set; }
+
     public int DefaultReminderMinutesBefore { get; set; } = 24 * 60;
 
     public string DefaultTimeZoneId { get; set; } = TimeZoneInfo.Local.Id;

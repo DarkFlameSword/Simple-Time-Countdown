@@ -6,47 +6,41 @@
 
 </div>
 
-一个面向 Windows 11 的轻量级桌面倒计时应用，基于 WPF 和 .NET 8 构建。
+面向 Windows 11 的轻量级桌面倒计时应用，基于 WPF + .NET 8 构建。
 
 ![img](example.png)
 
 ## 项目特点
 
-Simple Time Countdown 主要围绕三个目标设计：
-
-- 轻量级：采用桌面原生 WPF 技术栈，不依赖浏览器运行时，没有 Electron 一类的额外内存负担
-- 低资源占用：使用本地 JSON 存储，无后台同步服务，适合作为常驻桌面小工具长期运行
-- 界面简洁：以悬浮卡片和桌面浮层为核心，信息清晰，交互直接，不做复杂冗余的界面元素
+- 轻量级：原生 WPF，不依赖浏览器运行时，不引入 Electron 级内存负担
+- 低资源占用：本地 JSON 存储，无后台同步服务，适合常驻
+- 界面简洁：浮层卡片式 UI，信息聚焦，交互直接
 
 ## 仓库结构
 
 - `.github/workflows/`：Windows 构建 CI
-- `docs/`：项目和维护文档
+- `docs/`：开发与维护文档
 - `packaging/msix/`：MSIX 清单与打包资源
-- `scripts/`：图标生成、发布、安装脚本
+- `scripts/`：资源生成、发布与安装脚本
 - `src/SimpleTimeCountdown.App/`：WPF 主程序
-- `src/SimpleTimeCountdown.Setup/`：安装器程序
-- `artifacts/`：构建输出目录，不应提交到版本库
+- `src/SimpleTimeCountdown.Setup/`：品牌化安装器
+- `artifacts/`：构建输出目录（不建议提交）
 
-## 功能概览
+## 功能
 
-- 类似 Sticky Notes 的桌面悬浮倒计时面板
-- 轻量原生架构，适合低开销常驻运行
-- 简洁卡片式 UI，适合快速查看和管理截止日期
-- 多倒计时卡片，支持置顶、紧急和过期状态
+- 类似 Sticky Notes 的悬浮倒计时面板
+- 多倒计时卡片管理（支持置顶、到期状态、提醒通知）
 - 中英文界面切换
-- 搜索和筛选
-- 实验性的桌面层显示模式
-- 独立设置窗口
-- 可从非交互区域拖动主面板
-- 本地 JSON 持久化
-- 托盘菜单、开机自启、提醒通知
-- 支持 `Setup.exe` 和 `MSIX` 两种发布方式
+- 搜索与快速定位
+- 可选桌面层展示模式（实验性）
+- 托盘菜单、开机启动、设置面板
+- 本地持久化数据（`%AppData%/TimeCountdown/state.json`）
 
 ## 构建
 
-1. 安装带 Windows Desktop 支持的 .NET 8 SDK。
-2. 使用 Visual Studio 2022 打开 [SimpleTimeCountdown.sln](/E:/Work/Github%20Repository/Time%20Countdown/SimpleTimeCountdown.sln)，或在 PowerShell 中执行：
+1. 安装 .NET 8 SDK（含 Windows Desktop 支持）
+2. 打开 `SimpleTimeCountdown.sln`
+3. 执行：
 
 ```powershell
 dotnet build E:\Work\Github Repository\Time Countdown\SimpleTimeCountdown.sln
@@ -72,8 +66,6 @@ powershell -ExecutionPolicy Bypass -File E:\Work\Github Repository\Time Countdow
 powershell -ExecutionPolicy Bypass -File E:\Work\Github Repository\Time Countdown\scripts\Install-MSIX.ps1
 ```
 
-首次安装自签名开发版 MSIX 时，Windows 可能要求你以管理员 PowerShell 运行安装脚本，以便在系统级信任证书。
-
 经典安装包：
 
 ```powershell
@@ -82,7 +74,29 @@ powershell -ExecutionPolicy Bypass -File E:\Work\Github Repository\Time Countdow
 
 输出文件：
 
-- 便携版 ZIP：[SimpleTimeCountdown-Release-win-x64-portable.zip](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Release-win-x64-portable.zip)
-- 安装包 EXE：[SimpleTimeCountdown-Setup-win-x64.exe](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Setup-win-x64.exe)
-- MSIX：[SimpleTimeCountdown_1.2.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.2.0.0_win-x64.msix)
-- 开发证书：[TimeCountdownDev.cer](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/certificates/TimeCountdownDev.cer)
+- 便携包：`SimpleTimeCountdown-Release-win-x64-portable.zip`
+- 安装包：`SimpleTimeCountdown-Setup-win-x64.exe`
+- MSIX：`SimpleTimeCountdown_1.2.0.0_win-x64.msix`
+- 开发证书：`TimeCountdownDev.cer`
+
+## 下载
+
+请优先前往本仓库 GitHub Releases 下载最新版：
+
+- 最新版本： [Releases / Latest](../../releases/latest)
+- 历史版本： [Releases](../../releases)
+
+各安装包区别：
+
+- `SimpleTimeCountdown-Setup-win-x64.exe`（推荐多数用户）
+  - 标准安装向导，一键安装
+  - 自动创建开始菜单/桌面入口与卸载入口
+  - 适合日常长期使用
+- `SimpleTimeCountdown-Release-win-x64-portable.zip`
+  - 免安装，解压即用
+  - 不写入系统级安装/卸载记录
+  - 适合临时使用、U 盘携带或受限环境
+- `SimpleTimeCountdown_*.msix`
+  - 基于 MSIX 包模型，安装与卸载更规整
+  - 更符合 Windows 包管理体系
+  - 适合偏好 MSIX 部署流程的用户

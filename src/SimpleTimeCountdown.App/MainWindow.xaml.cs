@@ -176,6 +176,11 @@ public partial class MainWindow : Window
         ((App)System.Windows.Application.Current).ExitApplication();
     }
 
+    private void ToggleOverdueCards_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel.HideOverdueCards = !_viewModel.HideOverdueCards;
+    }
+
     private void Window_OnClosing(object? sender, CancelEventArgs e)
     {
         if (((App)System.Windows.Application.Current).CanWindowClose)

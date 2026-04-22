@@ -18,6 +18,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private IReadOnlyList<ReminderOption> _reminderOptions = [];
     private string _searchText = string.Empty;
     private string _selectedFilter = "All";
+    private bool _hideOverdueCards;
     private bool _alwaysOnTop;
     private bool _launchAtStartup;
     private bool _hideOnCloseToTray;
@@ -62,6 +63,7 @@ public sealed class MainWindowViewModel : ObservableObject
         _alwaysOnTop = state.Settings.AlwaysOnTop;
         _panelOpacity = Math.Clamp(state.Settings.PanelOpacity, 0.72, 1.00);
         _selectedFilter = NormalizeFilterKey(state.Settings.SelectedFilter);
+        _hideOverdueCards = state.Settings.HideOverdueCards;
         _launchAtStartup = _autostartService.IsEnabled();
         _hideOnCloseToTray = state.Settings.HideOnCloseToTray;
         _desktopLayerEnabled = state.Settings.DesktopLayerEnabled;
@@ -159,6 +161,39 @@ public sealed class MainWindowViewModel : ObservableObject
             _state.Settings.SelectedFilter = value;
             OnPropertyChanged(nameof(SelectedFilterOption));
             RefreshCountdowns(forcePersist: true);
+        }
+    }
+
+    public bool HideOverdueCards
+    {
+        get => _hideOverdueCards;
+        set
+        {
+            if (!SetProperty(ref _hideOverdueCards, value))
+            {
+                return;
+            }
+
+            _state.Settings.HideOverdueCards = value;
+            OnPropertyChanged(nameof(OverdueToggleGlyph));
+            OnPropertyChanged(nameof(OverdueToggleTooltip));
+            RefreshCountdowns(forcePersist: true);
+        }
+    }
+
+    public string OverdueToggleGlyph => HideOverdueCards ? "\uE891" : "\uE890";
+
+    public string OverdueToggleTooltip
+    {
+        get
+        {
+            var zh = string.Equals(_localization.CurrentLanguageCode, "zh-CN", StringComparison.OrdinalIgnoreCase);
+            if (HideOverdueCards)
+            {
+                return zh ? "显示已过期卡片" : "Show overdue cards";
+            }
+
+            return zh ? "收纳已过期卡片" : "Collapse overdue cards";
         }
     }
 
@@ -415,6 +450,7 @@ public sealed class MainWindowViewModel : ObservableObject
         _state.Settings.DesktopLayerEnabled = DesktopLayerEnabled;
         _state.Settings.PanelOpacity = PanelOpacity;
         _state.Settings.SelectedFilter = SelectedFilter;
+        _state.Settings.HideOverdueCards = HideOverdueCards;
         _state.Settings.DefaultReminderMinutesBefore = DefaultReminderMinutesBefore;
         _state.Settings.DefaultTimeZoneId = DefaultTimeZoneId;
         _state.Settings.OverdueThresholdDays = OverdueThresholdDays;
@@ -487,6 +523,11 @@ public sealed class MainWindowViewModel : ObservableObject
     private bool FilterCountdown(object candidate)
     {
         if (candidate is not CountdownItemViewModel item)
+        {
+            return false;
+        }
+
+        if (HideOverdueCards && item.IsOverdue)
         {
             return false;
         }
@@ -598,6 +639,7 @@ public sealed class MainWindowViewModel : ObservableObject
         LanguageOptions = BuildLanguageOptions();
         FilterOptions = BuildFilterOptions();
         ReminderOptions = OptionCatalog.GetReminderOptions();
+        OnPropertyChanged(nameof(OverdueToggleTooltip));
 
         if (!FilterOptions.Any(option => option.Key == SelectedFilter))
         {

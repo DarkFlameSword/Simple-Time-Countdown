@@ -56,6 +56,16 @@
             <Setter Property="FontWeight" Value="Normal" />
         </Style>
 
+        <Style x:Key="OverdueEyeButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HideOverdueCards}" Value="True">
+                    <Setter Property="Background" Value="#DCEBFA" />
+                    <Setter Property="BorderBrush" Value="#9BBEDE" />
+                    <Setter Property="Foreground" Value="#1E507E" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="CardActionButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderButtonStyle}">
             <Setter Property="Padding" Value="10,6" />
             <Setter Property="Margin" Value="6,0,0,0" />
@@ -216,7 +226,12 @@
             </Grid>
 
             <Grid Grid.Row="1" Margin="0,0,0,14">
-                <TextBox
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0"
                          Height="42"
                          Padding="14,10"
                          Background="#FAFDFF"
@@ -226,6 +241,13 @@
                          FontSize="14"
                          ToolTip="{Binding [Main.Search.Tooltip], Source={StaticResource Loc}}"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Button Grid.Column="1"
+                        Margin="10,0,0,0"
+                        Style="{StaticResource OverdueEyeButtonStyle}"
+                        Click="ToggleOverdueCards_Click"
+                        Content="{Binding OverdueToggleGlyph}"
+                        ToolTip="{Binding OverdueToggleTooltip}" />
             </Grid>
 
             <Grid Grid.Row="2">
