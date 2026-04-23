@@ -24,6 +24,8 @@ public sealed class CountdownItemViewModel : ObservableObject
     private bool _isToday;
     private bool _isSoon;
     private bool _isSafe;
+    private bool _isArchived;
+    private string _archivedAtDisplay = string.Empty;
     private CountdownThresholds _thresholds = CountdownThresholds.Default;
 
     public CountdownItemViewModel(CountdownItem model)
@@ -131,6 +133,22 @@ public sealed class CountdownItemViewModel : ObservableObject
         private set => SetProperty(ref _isSafe, value);
     }
 
+    public bool IsArchived
+    {
+        get => _isArchived;
+        private set => SetProperty(ref _isArchived, value);
+    }
+
+    public string ArchivedAtDisplay
+    {
+        get => _archivedAtDisplay;
+        private set => SetProperty(ref _archivedAtDisplay, value);
+    }
+
+    public string ArchiveActionTooltip => IsChinese ? "\u5F52\u6863" : "Archive";
+
+    public string RestoreActionTooltip => IsChinese ? "\u6062\u590D" : "Restore";
+
     public DateTimeOffset TargetAt => _model.TargetAt;
 
     public void Refresh(DateTimeOffset now)
@@ -141,6 +159,7 @@ public sealed class CountdownItemViewModel : ObservableObject
     public void Refresh(DateTimeOffset now, CountdownThresholds thresholds)
     {
         _thresholds = thresholds;
+        IsArchived = _model.IsArchived;
         var remaining = _model.TargetAt - now;
         var remainingDays = remaining.TotalDays;
         IsOverdue = remainingDays < thresholds.OverdueDays;
@@ -156,6 +175,32 @@ public sealed class CountdownItemViewModel : ObservableObject
         }
 
         IsUrgent = IsToday || IsSoon;
+
+        if (IsArchived)
+        {
+            StatusText = IsChinese ? "\u5DF2\u5F52\u6863" : "ARCHIVED";
+            StatusForeground = CreateBrush("#FFFFFF");
+            StatusBackground = CreateBrush("#92A6BA");
+            ProgressBrush = CreateBrush("#92A6BA");
+            RemainingPrimary = FormatPrimary(remaining);
+            RemainingSecondary = IsChinese ? "\u5DF2\u5F52\u6863" : "Archived";
+            ProgressPercent = CalculateProgress(now);
+            ArchivedAtDisplay = BuildArchivedAtDisplay(_model.ArchivedAt ?? now);
+            DeadlineDisplay = _localization.Format("Countdown.Deadline", _model.TargetAt.ToLocalTime());
+            IsOverdue = false;
+            IsToday = false;
+            IsSoon = false;
+            IsSafe = false;
+            IsUrgent = false;
+            OnPropertyChanged(nameof(IsPinned));
+            OnPropertyChanged(nameof(HasTags));
+            OnPropertyChanged(nameof(Tags));
+            OnPropertyChanged(nameof(SubtitleDisplay));
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(ArchiveActionTooltip));
+            OnPropertyChanged(nameof(RestoreActionTooltip));
+            return;
+        }
 
         if (IsOverdue)
         {
@@ -198,12 +243,15 @@ public sealed class CountdownItemViewModel : ObservableObject
             ProgressPercent = CalculateProgress(now);
         }
 
+        ArchivedAtDisplay = string.Empty;
         DeadlineDisplay = _localization.Format("Countdown.Deadline", _model.TargetAt.ToLocalTime());
         OnPropertyChanged(nameof(IsPinned));
         OnPropertyChanged(nameof(HasTags));
         OnPropertyChanged(nameof(Tags));
         OnPropertyChanged(nameof(SubtitleDisplay));
         OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(ArchiveActionTooltip));
+        OnPropertyChanged(nameof(RestoreActionTooltip));
     }
 
     public CountdownItem ToModelCopy()
@@ -219,6 +267,8 @@ public sealed class CountdownItemViewModel : ObservableObject
             ReminderMinutesBefore = _model.ReminderMinutesBefore,
             ReminderShown = _model.ReminderShown,
             DueShown = _model.DueShown,
+            IsArchived = _model.IsArchived,
+            ArchivedAt = _model.ArchivedAt,
             Tags = [.. _model.Tags],
             CreatedAt = _model.CreatedAt
         };
@@ -276,5 +326,15 @@ public sealed class CountdownItemViewModel : ObservableObject
         }
 
         return _localization.Format("Time.Seconds", Math.Max(0, span.Seconds));
+    }
+
+    private bool IsChinese => string.Equals(_localization.CurrentLanguageCode, "zh-CN", StringComparison.OrdinalIgnoreCase);
+
+    private string BuildArchivedAtDisplay(DateTimeOffset archivedAt)
+    {
+        var local = archivedAt.ToLocalTime();
+        return IsChinese
+            ? $"\u5F52\u6863\u65F6\u95F4 | {local:yyyy-MM-dd HH:mm}"
+            : $"Archived at | {local:yyyy-MM-dd HH:mm}";
     }
 }

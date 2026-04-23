@@ -20,8 +20,11 @@ public sealed class CountdownItem
 
     public bool DueShown { get; set; }
 
+    public bool IsArchived { get; set; }
+
+    public DateTimeOffset? ArchivedAt { get; set; }
+
     public List<string> Tags { get; set; } = [];
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
 }
-

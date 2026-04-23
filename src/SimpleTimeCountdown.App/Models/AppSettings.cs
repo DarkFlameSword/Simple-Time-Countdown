@@ -16,6 +16,8 @@ public sealed class AppSettings
 
     public bool HideOverdueCards { get; set; }
 
+    public bool ShowArchivedOnly { get; set; }
+
     public int DefaultReminderMinutesBefore { get; set; } = 24 * 60;
 
     public string DefaultTimeZoneId { get; set; } = TimeZoneInfo.Local.Id;

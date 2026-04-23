@@ -18,7 +18,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private IReadOnlyList<ReminderOption> _reminderOptions = [];
     private string _searchText = string.Empty;
     private string _selectedFilter = "All";
-    private bool _hideOverdueCards;
+    private bool _showArchivedOnly;
     private bool _alwaysOnTop;
     private bool _launchAtStartup;
     private bool _hideOnCloseToTray;
@@ -63,7 +63,7 @@ public sealed class MainWindowViewModel : ObservableObject
         _alwaysOnTop = state.Settings.AlwaysOnTop;
         _panelOpacity = Math.Clamp(state.Settings.PanelOpacity, 0.72, 1.00);
         _selectedFilter = NormalizeFilterKey(state.Settings.SelectedFilter);
-        _hideOverdueCards = state.Settings.HideOverdueCards;
+        _showArchivedOnly = state.Settings.ShowArchivedOnly;
         _launchAtStartup = _autostartService.IsEnabled();
         _hideOnCloseToTray = state.Settings.HideOnCloseToTray;
         _desktopLayerEnabled = state.Settings.DesktopLayerEnabled;
@@ -164,36 +164,33 @@ public sealed class MainWindowViewModel : ObservableObject
         }
     }
 
-    public bool HideOverdueCards
+    public bool ShowArchivedOnly
     {
-        get => _hideOverdueCards;
+        get => _showArchivedOnly;
         set
         {
-            if (!SetProperty(ref _hideOverdueCards, value))
+            if (!SetProperty(ref _showArchivedOnly, value))
             {
                 return;
             }
 
-            _state.Settings.HideOverdueCards = value;
-            OnPropertyChanged(nameof(OverdueToggleGlyph));
-            OnPropertyChanged(nameof(OverdueToggleTooltip));
+            _state.Settings.ShowArchivedOnly = value;
+            OnPropertyChanged(nameof(ArchiveViewGlyph));
+            OnPropertyChanged(nameof(ArchiveViewTooltipText));
             RefreshCountdowns(forcePersist: true);
         }
     }
 
-    public string OverdueToggleGlyph => HideOverdueCards ? "\uE891" : "\uE890";
+    public string ArchiveViewGlyph => "\uE8A5";
 
-    public string OverdueToggleTooltip
+    public string ArchiveViewTooltipText
     {
         get
         {
             var zh = string.Equals(_localization.CurrentLanguageCode, "zh-CN", StringComparison.OrdinalIgnoreCase);
-            if (HideOverdueCards)
-            {
-                return zh ? "显示已过期卡片" : "Show overdue cards";
-            }
-
-            return zh ? "收纳已过期卡片" : "Collapse overdue cards";
+            return ShowArchivedOnly
+                ? (zh ? "返回主列表" : "Back to main list")
+                : (zh ? "仅显示已归档卡片" : "Show archived cards only");
         }
     }
 
@@ -427,6 +424,36 @@ public sealed class MainWindowViewModel : ObservableObject
         RefreshCountdowns(forcePersist: true);
     }
 
+    public void ArchiveCountdown(CountdownItemViewModel item)
+    {
+        if (item.Model.IsArchived)
+        {
+            return;
+        }
+
+        item.Model.IsArchived = true;
+        item.Model.ArchivedAt = DateTimeOffset.Now;
+        item.Model.ReminderShown = true;
+        item.Model.DueShown = true;
+        SortCountdowns();
+        RefreshCountdowns(forcePersist: true);
+    }
+
+    public void RestoreCountdown(CountdownItemViewModel item)
+    {
+        if (!item.Model.IsArchived)
+        {
+            return;
+        }
+
+        item.Model.IsArchived = false;
+        item.Model.ArchivedAt = null;
+        item.Model.ReminderShown = false;
+        item.Model.DueShown = false;
+        SortCountdowns();
+        RefreshCountdowns(forcePersist: true);
+    }
+
     public void UpdateWindowBounds(double left, double top, double width, double height)
     {
         _state.Settings.WindowLeft = left;
@@ -450,7 +477,7 @@ public sealed class MainWindowViewModel : ObservableObject
         _state.Settings.DesktopLayerEnabled = DesktopLayerEnabled;
         _state.Settings.PanelOpacity = PanelOpacity;
         _state.Settings.SelectedFilter = SelectedFilter;
-        _state.Settings.HideOverdueCards = HideOverdueCards;
+        _state.Settings.ShowArchivedOnly = ShowArchivedOnly;
         _state.Settings.DefaultReminderMinutesBefore = DefaultReminderMinutesBefore;
         _state.Settings.DefaultTimeZoneId = DefaultTimeZoneId;
         _state.Settings.OverdueThresholdDays = OverdueThresholdDays;
@@ -491,6 +518,10 @@ public sealed class MainWindowViewModel : ObservableObject
     private bool TryTriggerNotifications(CountdownItemViewModel countdown, DateTimeOffset now)
     {
         var item = countdown.Model;
+        if (item.IsArchived)
+        {
+            return false;
+        }
 
         if (!item.ReminderShown &&
             item.ReminderMinutesBefore > 0 &&
@@ -527,7 +558,14 @@ public sealed class MainWindowViewModel : ObservableObject
             return false;
         }
 
-        if (HideOverdueCards && item.IsOverdue)
+        if (ShowArchivedOnly)
+        {
+            if (!item.IsArchived)
+            {
+                return false;
+            }
+        }
+        else if (item.IsArchived)
         {
             return false;
         }
@@ -639,7 +677,7 @@ public sealed class MainWindowViewModel : ObservableObject
         LanguageOptions = BuildLanguageOptions();
         FilterOptions = BuildFilterOptions();
         ReminderOptions = OptionCatalog.GetReminderOptions();
-        OnPropertyChanged(nameof(OverdueToggleTooltip));
+        OnPropertyChanged(nameof(ArchiveViewTooltipText));
 
         if (!FilterOptions.Any(option => option.Key == SelectedFilter))
         {

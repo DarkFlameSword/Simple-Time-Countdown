@@ -56,9 +56,9 @@
             <Setter Property="FontWeight" Value="Normal" />
         </Style>
 
-        <Style x:Key="OverdueEyeButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
+        <Style x:Key="ArchiveViewButtonStyle" TargetType="Button" BasedOn="{StaticResource HeaderIconButtonStyle}">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding HideOverdueCards}" Value="True">
+                <DataTrigger Binding="{Binding ShowArchivedOnly}" Value="True">
                     <Setter Property="Background" Value="#DCEBFA" />
                     <Setter Property="BorderBrush" Value="#9BBEDE" />
                     <Setter Property="Foreground" Value="#1E507E" />
@@ -244,10 +244,10 @@
 
                 <Button Grid.Column="1"
                         Margin="10,0,0,0"
-                        Style="{StaticResource OverdueEyeButtonStyle}"
-                        Click="ToggleOverdueCards_Click"
-                        Content="{Binding OverdueToggleGlyph}"
-                        ToolTip="{Binding OverdueToggleTooltip}" />
+                        Style="{StaticResource ArchiveViewButtonStyle}"
+                        Click="ToggleArchiveView_Click"
+                        Content="{Binding ArchiveViewGlyph}"
+                        ToolTip="{Binding ArchiveViewTooltipText}" />
             </Grid>
 
             <Grid Grid.Row="2">
@@ -321,9 +321,20 @@
                                                 HorizontalAlignment="Right"
                                                 VerticalAlignment="Center">
                                         <Button Style="{StaticResource CardIconButtonStyle}"
+                                                Click="ArchiveCountdown_Click"
+                                                Content="&#xE7B8;"
+                                                ToolTip="{Binding ArchiveActionTooltip}"
+                                                Visibility="{Binding IsArchived, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                        <Button Style="{StaticResource CardIconButtonStyle}"
                                                 Click="EditCountdown_Click"
                                                 Content="&#xE90F;"
-                                                ToolTip="{Binding [Common.Edit], Source={StaticResource Loc}}" />
+                                                ToolTip="{Binding [Common.Edit], Source={StaticResource Loc}}"
+                                                Visibility="{Binding IsArchived, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                                        <Button Style="{StaticResource CardIconButtonStyle}"
+                                                Click="RestoreCountdown_Click"
+                                                Content="&#xE72C;"
+                                                ToolTip="{Binding RestoreActionTooltip}"
+                                                Visibility="{Binding IsArchived, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <Button Style="{StaticResource CardIconButtonStyle}"
                                                 Click="DeleteCountdown_Click"
                                                 Content="&#xE74D;"
@@ -362,6 +373,13 @@
                                                FontSize="13"
                                                Text="{Binding DeadlineDisplay}" />
 
+                                    <TextBlock Grid.Row="3"
+                                               Margin="0,24,0,0"
+                                               Foreground="#6E8AA6"
+                                               FontSize="12"
+                                               Text="{Binding ArchivedAtDisplay}"
+                                               Visibility="{Binding IsArchived, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
                                     <ItemsControl Grid.Row="4"
                                                   Margin="0,12,0,0"
                                                   ItemsSource="{Binding Tags}"
@@ -393,6 +411,7 @@
                                                  Background="#DCE9F5"
                                                  Foreground="{Binding ProgressBrush}"
                                                  Maximum="100"
+                                                 Visibility="{Binding IsArchived, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                                  Value="{Binding ProgressPercent, Mode=OneWay}" />
                                 </Grid>
                             </Border>

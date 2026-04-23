@@ -151,6 +151,22 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ArchiveCountdown_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: CountdownItemViewModel item })
+        {
+            _viewModel.ArchiveCountdown(item);
+        }
+    }
+
+    private void RestoreCountdown_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: CountdownItemViewModel item })
+        {
+            _viewModel.RestoreCountdown(item);
+        }
+    }
+
     private void WindowSurface_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed)
@@ -176,9 +192,9 @@ public partial class MainWindow : Window
         ((App)System.Windows.Application.Current).ExitApplication();
     }
 
-    private void ToggleOverdueCards_Click(object sender, RoutedEventArgs e)
+    private void ToggleArchiveView_Click(object sender, RoutedEventArgs e)
     {
-        _viewModel.HideOverdueCards = !_viewModel.HideOverdueCards;
+        _viewModel.ShowArchivedOnly = !_viewModel.ShowArchivedOnly;
     }
 
     private void Window_OnClosing(object? sender, CancelEventArgs e)
