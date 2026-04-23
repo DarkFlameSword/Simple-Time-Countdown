@@ -17,8 +17,6 @@ internal sealed class InstallerForm : Form
     private readonly Panel _installPathPanel;
     private readonly TextBox _installPathTextBox;
     private readonly Button _browseInstallPathButton;
-    private readonly Label _changesTitleLabel;
-    private readonly Label _changesBodyLabel;
     private readonly Label _statusLabel;
     private readonly ProgressBar _progressBar;
     private readonly CheckBox _launchCheckBox;
@@ -94,7 +92,7 @@ internal sealed class InstallerForm : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 14,
+            RowCount = 12,
             Padding = new Padding(0, 4, 0, 0)
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -103,8 +101,6 @@ internal sealed class InstallerForm : Form
             layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         }
 
-        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         contentPanel.Controls.Add(layout);
@@ -136,14 +132,13 @@ internal sealed class InstallerForm : Form
         {
             AutoSize = false,
             Size = new Size(84, 32),
-            Text = "浏览...",
+            Text = "Change",
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.FromArgb(245, 250, 255),
             ForeColor = Color.FromArgb(52, 95, 137),
             Font = new Font("Segoe UI Semibold", 9.5F, FontStyle.Bold, GraphicsUnit.Point),
             Margin = new Padding(8, 0, 0, 0)
         };
-        _browseInstallPathButton.Text = "\u66F4\u6539";
         _browseInstallPathButton.FlatAppearance.BorderColor = Color.FromArgb(206, 224, 242);
         _browseInstallPathButton.FlatAppearance.BorderSize = 1;
         _browseInstallPathButton.Click += BrowseInstallPathButtonOnClick;
@@ -159,15 +154,10 @@ internal sealed class InstallerForm : Form
         _installPathPanel.Controls.Add(_browseInstallPathButton);
         LayoutInstallPathControls();
 
-        _changesTitleLabel = CreateLabel(Color.FromArgb(43, 94, 139), new Font("Segoe UI Semibold", 10F, FontStyle.Bold, GraphicsUnit.Point), 520);
-        _changesTitleLabel.Margin = new Padding(0, 18, 0, 0);
-        _changesBodyLabel = CreateLabel(Color.FromArgb(84, 107, 129), new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point), 520);
-        _changesBodyLabel.Margin = new Padding(0, 8, 0, 0);
-
         _launchCheckBox = new CheckBox
         {
             AutoSize = true,
-            Text = $"安装完成后立即启动 {InstallerContext.ProductName}",
+            Text = $"Launch {InstallerContext.ProductName} after installation",
             ForeColor = Color.FromArgb(43, 94, 139),
             Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold, GraphicsUnit.Point),
             Margin = new Padding(0, 18, 0, 0),
@@ -177,7 +167,7 @@ internal sealed class InstallerForm : Form
         _removeDataCheckBox = new CheckBox
         {
             AutoSize = true,
-            Text = "同时删除本地数据（倒计时和设置）",
+            Text = "Also remove local data (countdowns and settings)",
             ForeColor = Color.FromArgb(43, 94, 139),
             Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold, GraphicsUnit.Point),
             Margin = new Padding(0, 18, 0, 0),
@@ -243,14 +233,12 @@ internal sealed class InstallerForm : Form
         layout.Controls.Add(_versionLabel, 0, 3);
         layout.Controls.Add(_locationLabel, 0, 4);
         layout.Controls.Add(_installPathPanel, 0, 5);
-        layout.Controls.Add(_changesTitleLabel, 0, 6);
-        layout.Controls.Add(_changesBodyLabel, 0, 7);
-        layout.Controls.Add(_launchCheckBox, 0, 8);
-        layout.Controls.Add(_removeDataCheckBox, 0, 9);
-        layout.Controls.Add(_statusLabel, 0, 10);
-        layout.Controls.Add(_progressBar, 0, 11);
-        layout.Controls.Add(spacer, 0, 12);
-        layout.Controls.Add(buttonPanel, 0, 13);
+        layout.Controls.Add(_launchCheckBox, 0, 6);
+        layout.Controls.Add(_removeDataCheckBox, 0, 7);
+        layout.Controls.Add(_statusLabel, 0, 8);
+        layout.Controls.Add(_progressBar, 0, 9);
+        layout.Controls.Add(spacer, 0, 10);
+        layout.Controls.Add(buttonPanel, 0, 11);
 
         MouseDown += DragWindow;
         _brandPanel.MouseDown += DragWindow;
@@ -274,31 +262,28 @@ internal sealed class InstallerForm : Form
     {
         _eyebrowLabel.Text = _uninstallMode ? "UNINSTALLER" : (_existingInstall ? "UPDATE INSTALLER" : "SETUP");
         _titleLabel.Text = _uninstallMode
-            ? $"卸载 {InstallerContext.ProductName}"
-            : (_existingInstall ? $"升级你的 {InstallerContext.ProductName}" : $"安装 {InstallerContext.ProductName}");
+            ? $"Uninstall {InstallerContext.ProductName}"
+            : (_existingInstall ? $"Upgrade your {InstallerContext.ProductName}" : $"Install {InstallerContext.ProductName}");
 
         _bodyLabel.Text = _uninstallMode
-            ? "安装器会移除软件本体、桌面快捷方式和开始菜单入口。默认会保留本地倒计时与设置数据；如果你希望彻底清空，也可以勾选删除本地数据。"
-            : $"{InstallerContext.ProductName} 是一款面向 Windows 11 的轻量级桌面倒计时应用，强调低内存占用、简洁界面和始终可见的桌面浮层体验。";
+            ? "The uninstaller removes the app, desktop shortcut, and Start menu entry. By default, local countdown data is preserved."
+            : $"{InstallerContext.ProductName} is a lightweight floating countdown app for Windows 11 with low memory usage and a clean desktop-first UI.";
 
-        _versionLabel.Text = $"版本 {InstallerContext.ProductVersion}  |  适用于 Windows 11 x64";
+        _versionLabel.Text = $"Version {InstallerContext.ProductDisplayVersion}";
         _locationLabel.Text = _uninstallMode
-            ? $"当前安装位置{Environment.NewLine}{InstallerContext.InstallRoot}"
-            : "安装位置（可自定义）";
+            ? $"Installed location{Environment.NewLine}{InstallerContext.InstallRoot}"
+            : "Install location (customizable)";
+
         _installPathTextBox.Text = InstallerContext.InstallRoot;
-        _changesTitleLabel.Text = _uninstallMode ? string.Empty : $"{InstallerContext.ProductVersion} 改动细则";
-        _changesBodyLabel.Text = _uninstallMode ? string.Empty : InstallerReleaseInfo.BuildHighlightsText();
         _installPathPanel.Visible = !_uninstallMode;
-        _changesTitleLabel.Visible = !_uninstallMode;
-        _changesBodyLabel.Visible = !_uninstallMode;
         _launchCheckBox.Visible = !_uninstallMode;
         _removeDataCheckBox.Visible = _uninstallMode;
         _statusLabel.Visible = false;
         _progressBar.Visible = false;
         _secondaryButton.Visible = true;
         _secondaryButton.Enabled = true;
-        _secondaryButton.Text = "取消";
-        _primaryButton.Text = _uninstallMode ? "立即卸载" : (_existingInstall ? "立即更新" : "立即安装");
+        _secondaryButton.Text = "Cancel";
+        _primaryButton.Text = _uninstallMode ? "Uninstall now" : (_existingInstall ? "Update now" : "Install now");
         _primaryButton.Enabled = true;
     }
 
@@ -316,25 +301,29 @@ internal sealed class InstallerForm : Form
         {
             if (_uninstallMode)
             {
-                ShowProgressState($"正在卸载 {InstallerContext.ProductName}", "正在清理快捷方式、软件本体和可选的本地数据。");
+                ShowProgressState(
+                    $"Uninstalling {InstallerContext.ProductName}",
+                    "Removing app files, shortcuts, and optional local data...");
+
                 await RunStaTask(() => InstallerEngine.Uninstall(
                     new InstallOptions
                     {
                         RemoveLocalData = _removeDataCheckBox.Checked
                     },
                     progress));
+
                 ShowCompleteState(
-                    "卸载完成",
+                    "Uninstall completed",
                     _removeDataCheckBox.Checked
-                        ? $"{InstallerContext.ProductName} 已从当前用户目录移除，并删除了本地倒计时和设置数据。"
-                        : $"{InstallerContext.ProductName} 已从当前用户目录移除。本地数据仍被保留，后续重新安装后可以继续恢复使用。",
-                    "关闭");
+                        ? $"{InstallerContext.ProductName} and local data were removed."
+                        : $"{InstallerContext.ProductName} was removed. Local data was kept for future reinstall.",
+                    "Close");
                 return;
             }
 
             ShowProgressState(
-                _existingInstall ? $"正在更新 {InstallerContext.ProductName}" : $"正在安装 {InstallerContext.ProductName}",
-                "正在准备桌面倒计时应用和安装资源。");
+                _existingInstall ? $"Updating {InstallerContext.ProductName}" : $"Installing {InstallerContext.ProductName}",
+                "Preparing application files and installation resources...");
 
             var selectedInstallDirectory = GetSelectedInstallDirectory();
             await RunStaTask(() => InstallerEngine.Install(
@@ -346,17 +335,17 @@ internal sealed class InstallerForm : Form
                 progress));
 
             ShowCompleteState(
-                _launchCheckBox.Checked ? "安装完成，已为你启动应用" : "安装完成",
+                _launchCheckBox.Checked ? "Install complete, launching app..." : "Install complete",
                 _launchCheckBox.Checked
-                    ? $"你现在可以开始使用 {InstallerContext.ProductName} 添加截止日期、固定重要卡片，并在设置中启用桌面层模式。"
-                    : $"{InstallerContext.ProductName} 已成功安装。你可以从桌面快捷方式或开始菜单随时启动它。",
-                "完成");
+                    ? $"You can now use {InstallerContext.ProductName} to manage deadlines and floating countdown cards."
+                    : $"{InstallerContext.ProductName} has been installed successfully.",
+                "Done");
         }
         catch (Exception ex)
         {
             ToggleBusy(false);
             MessageBox.Show(
-                $"安装过程中出现问题：{Environment.NewLine}{Environment.NewLine}{ex.Message}",
+                $"Installation failed:{Environment.NewLine}{Environment.NewLine}{ex.Message}",
                 InstallerContext.ProductName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -371,14 +360,12 @@ internal sealed class InstallerForm : Form
         _versionLabel.Text = string.Empty;
         _locationLabel.Text = string.Empty;
         _installPathPanel.Visible = false;
-        _changesTitleLabel.Visible = false;
-        _changesBodyLabel.Visible = false;
         _launchCheckBox.Visible = false;
         _removeDataCheckBox.Visible = false;
         _statusLabel.Visible = true;
         _progressBar.Visible = true;
         _progressBar.Value = 0;
-        _statusLabel.Text = $"正在开始...{Environment.NewLine}请保持此窗口打开。";
+        _statusLabel.Text = $"Starting...{Environment.NewLine}Please keep this window open.";
         _secondaryButton.Enabled = false;
         _primaryButton.Enabled = false;
     }
@@ -392,8 +379,6 @@ internal sealed class InstallerForm : Form
         _versionLabel.Text = string.Empty;
         _locationLabel.Text = string.Empty;
         _installPathPanel.Visible = false;
-        _changesTitleLabel.Visible = false;
-        _changesBodyLabel.Visible = false;
         _launchCheckBox.Visible = false;
         _removeDataCheckBox.Visible = false;
         _statusLabel.Visible = false;
@@ -463,9 +448,9 @@ internal sealed class InstallerForm : Form
         using var footFont = new Font("Segoe UI", 9.5f);
 
         e.Graphics.DrawString(InstallerContext.ProductName, badgeFont, badgeTextBrush, new RectangleF(132, 60, 144, 20));
-        e.Graphics.DrawString("轻量、常驻、专注的桌面倒计时助手", titleFont, titleBrush, new RectangleF(28, 132, 258, 118));
-        e.Graphics.DrawString("- 轻量级桌面原生应用\r\n- 常驻悬浮，不打扰也不缺席\r\n- 简洁卡片式 UI，让计划一直在眼前", bodyFont, bodyBrush, new RectangleF(30, 258, 252, 134));
-        e.Graphics.DrawString("适合论文投稿、项目里程碑、考试日程和个人计划管理。", footFont, footBrush, new RectangleF(30, 414, 248, 46));
+        e.Graphics.DrawString("Lightweight desktop countdown assistant", titleFont, titleBrush, new RectangleF(28, 132, 258, 118));
+        e.Graphics.DrawString("- Native lightweight desktop app\r\n- Floating panel that stays visible\r\n- Clean card UI for deadlines", bodyFont, bodyBrush, new RectangleF(30, 258, 252, 134));
+        e.Graphics.DrawString("Suitable for project milestones, study plans, and personal schedules.", footFont, footBrush, new RectangleF(30, 414, 248, 46));
     }
 
     private static Label CreateLabel(Color color, Font font, int maxWidth)
@@ -523,7 +508,7 @@ internal sealed class InstallerForm : Form
     {
         using var dialog = new FolderBrowserDialog
         {
-            Description = $"选择 {InstallerContext.ProductName} 的安装目录",
+            Description = $"Select install folder for {InstallerContext.ProductName}",
             UseDescriptionForTitle = true,
             SelectedPath = string.IsNullOrWhiteSpace(_installPathTextBox.Text)
                 ? InstallerContext.DefaultInstallRoot
@@ -546,7 +531,7 @@ internal sealed class InstallerForm : Form
         var rawPath = _installPathTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(rawPath))
         {
-            throw new InvalidOperationException("安装目录不能为空。");
+            throw new InvalidOperationException("Install directory cannot be empty.");
         }
 
         return Path.GetFullPath(Environment.ExpandEnvironmentVariables(rawPath));

@@ -18,7 +18,17 @@ internal static class InstallerContext
     public static string ProductVersion =>
         Assembly.GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion ?? "1.2.0";
+            .InformationalVersion ?? "1.3.0";
+
+    public static string ProductDisplayVersion
+    {
+        get
+        {
+            var version = ProductVersion;
+            var metadataSeparator = version.IndexOf('+');
+            return metadataSeparator >= 0 ? version[..metadataSeparator] : version;
+        }
+    }
 
     public static string InstallRoot => _installRoot;
 

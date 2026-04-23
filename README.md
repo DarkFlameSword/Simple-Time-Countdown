@@ -2,10 +2,9 @@
 
 <div align="center">
 
-[**English**](README.md) | [简体中文](README.zh-CN.md)
+[**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
 </div>
-
 
 A lightweight floating countdown app for Windows 11, built with WPF and .NET 8.
 
@@ -38,9 +37,9 @@ This project follows a reusable lightweight desktop app workflow, from product d
 - Floating desktop panel inspired by Sticky Notes
 - Lightweight desktop-native architecture focused on low overhead
 - Clean, minimal UI that stays readable as a desktop utility
-- Multiple countdown cards with pinned, urgent, and overdue states
+- Multiple countdown cards with pinned, urgency, overdue, and archived states
 - English and Simplified Chinese UI language switching
-- Search and filter for all, urgent, pinned, and overdue items
+- Search and filter support for fast card lookup
 - Experimental desktop-layer mode that can attach the panel to the Windows desktop host
 - Dedicated settings window for display, startup, defaults, and panel placement
 - Drag the floating panel from any non-interactive area, not only the header
@@ -92,7 +91,7 @@ Outputs:
 
 - Portable zip: [SimpleTimeCountdown-Release-win-x64-portable.zip](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Release-win-x64-portable.zip)
 - Setup EXE: [SimpleTimeCountdown-Setup-win-x64.exe](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown-Setup-win-x64.exe)
-- MSIX: [SimpleTimeCountdown_1.2.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.2.0.0_win-x64.msix)
+- MSIX: [SimpleTimeCountdown_1.3.0.0_win-x64.msix](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/packages/SimpleTimeCountdown_1.3.0.0_win-x64.msix)
 - Dev certificate: [TimeCountdownDev.cer](/E:/Work/Github%20Repository/Time%20Countdown/artifacts/certificates/TimeCountdownDev.cer)
 
 ## Download
