@@ -1,3 +1,3 @@
 # Contributing
 
-Special thanks to codex for their help in this project.
+Special thanks to codex for its help in this project.
